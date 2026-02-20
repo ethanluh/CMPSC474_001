@@ -1,20 +1,17 @@
-#include <unistd.h>
+#include <stdio.h>
 #include <fcntl.h>
+#include <unistd.h>
 
-int main()
-{
-    int f, n;
-    char buffer[100];
+#define BUFFER_SIZE 1024
 
-    f = open("fifo1", O_RDONLY);
+int main() {
+    int fd;
+    char buffer[BUFFER_SIZE];
 
-    n = read(f, buffer, 100);
+    fd = open("fifo2", O_RDONLY);
+    read(fd, buffer, BUFFER_SIZE);
+    printf("Received: %s\n", buffer);
 
-    if (n >= 0)
-    {
-        write(1, "Received data: ", 15);
-        write(1, buffer, n);
-    }
-    
+    close(fd);
     return 0;
 }

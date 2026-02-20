@@ -1,76 +1,42 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/wait.h>
 
-int intToChar(char* out, int in); // Return: len of char array. Takes char array ptr, int to convert
+#define SHM_KEY 441
+#define SHM_SIZE 2048
 
-int main()
-{
-    pid_t p, c;
-    p = getpid();
-    void * shared_memory;
+int main() {
+    int shmid;
+    void *shm_ptr;
     char buffer[100];
-    int shmid, n, m;
-    char shmid_char[20];
-
-    c = fork();
     
+    pid_t pid = fork();
 
-    if (c == 0) {
-        shmid = shmget((key_t)441, 2048, 0666|IPC_CREAT);
-        shared_memory = shmat(shmid, NULL, 0);
-        write(0, "child process with shmid: ", 27);
+    if (pid == 0) {
+        shmid = shmget((key_t)SHM_KEY, SHM_SIZE, 0666|IPC_CREAT);
 
-        m = intToChar(shmid_char, shmid);
+        printf("child process with shmid: %d\n", shmid);
 
-        write(1, shmid_char, 2);
-        write(0, "\n", 2);
+        shm_ptr = shmat(shmid, NULL, 0);
 
-        n = read(0, buffer, 100);
-        write(1, "shared memory in child: ", 25);
-        write(1, buffer, n);
-        strcpy(shared_memory, buffer);
-    }
+        read(0, buffer, 100);
+        strcpy(shm_ptr, buffer);
+        printf("shared memory in child: %s\n", (char *)shm_ptr);
+    } 
     else {
         wait(NULL);
+        shmid = shmget((key_t)SHM_KEY, SHM_SIZE, 0666);
 
-        shmid = shmget((key_t)441, 2048, 0666);
-        write(0, "parent process with shmid: ", 28);
+        printf("parent process with shmid: %d\n", shmid);
 
-        m = intToChar(shmid_char, shmid);
+        shm_ptr = shmat(shmid, NULL, 0);
 
-        write(1, shmid_char, m);
-        write(1, "\n", 2);
-
-        shared_memory = shmat(shmid, NULL, 0);
-        write(1, "shared memory in parent: ", 26);
-        write(1, (char *)shared_memory, strlen((char *)shared_memory));
-        write(0, "\n", 2);
+        printf("shared memory in parent: %s\n", (char *)shm_ptr);
     }
 
     return 0;
-}
-
-int intToChar(char* out, int in) {
-    int i = 0, j;
-    char temp;
-
-    if (in == 0) {
-        out[i++] = '0';
-    } else {
-        // Handle negative numbers if needed, for shmget ID it's non-negative on success
-        while (in > 0) {
-            out[i++] = (in % 10);
-            in /= 10;
-        }
-    }
-    out[i] = '\0';
-
-    // Reverse the string
-    for (j = 0; j < i / 2; j++) {
-        temp = out[j];
-        out[j] = out[i - j - 1];
-        out[i - j - 1] = temp;
-    }
 }

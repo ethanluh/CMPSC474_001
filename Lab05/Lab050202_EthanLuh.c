@@ -1,13 +1,15 @@
-#include <unistd.h>
+#include <stdio.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
 
-int main()
-{
-    int f;
+int main() {
+    int fd;
+    char *message = "This is named pipe.";
 
-    f = open("fifo1", O_WRONLY);
-    write(f, "This is named pipe.\n", 21);
-    write(1, "\nData is sent\n", 15);
+    fd = open("fifo2", O_WRONLY);
+    write(fd, message, strlen(message) + 1);
 
+    printf("Message sent.\n");
     return 0;
 }

@@ -1,41 +1,37 @@
+#include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
-#include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
-#include <sys/stat.h>
 
-#define MAX_TEXT 512
+#define MSG_KEY 144
+#define BUFFER_SIZE 1024
 
-struct msg {
-    long int msg_type;
-    char text[MAX_TEXT];
+struct msg_buffer {
+    long msg_type;
+    char msg_text[BUFFER_SIZE];
 };
 
 int main() {
-    int running = 1;
     int msgid;
-    struct msg data;
-    char buffer[50];
-    
-    msgid = msgget((key_t)144, 0666|IPC_CREAT);
+    struct msg_buffer message;
 
-    if (msgid == -1) {
-        write(1, "Error in creating queue.\n", 26);
-        exit(0);
+    msgid = msgget(MSG_KEY, 0666 | IPC_CREAT);
+    if (msgid < 0) {
+        perror("msgget");
+        exit(EXIT_FAILURE);
     }
 
-    while (running) {
-        write(1, "Enter message: ", 16);
-        read(0, buffer, 50);
-        data.msg_type = 1;
-        strcpy(data.text, buffer);
-        if(msgsnd(msgid, (void*)&data, MAX_TEXT, 0) == -1)
-            write(0, "Message not sent.\n", 19);
+    message.msg_type = 1;
 
-        if(strncmp(buffer, "quit", 4) == 0)
-            running = 0;
+    while (1) {
+        printf("enter message: ");
+        fgets(message.msg_text, BUFFER_SIZE, stdin);
+
+        msgsnd(msgid, &message, sizeof(message.msg_text), 0);
+
+        if (strncmp(message.msg_text, "quit", 4) == 0)
+            break;
     }
 
     return 0;
