@@ -15,6 +15,7 @@ int main() {
     else {
         printf("Allocation successful!\n");
     }
+    printf("%d", (int)sizeof(malloc_attempt));
     // malloc limit around 800000000000
     return 0;
 }
