@@ -1,0 +1,19 @@
+Lab 13 Task 3 Analysis
+
+1. In Task 1 (or Task 2), are the outputs always the same throughout several executions? If not, can you explain the reason(s)?
+
+No, the outputs are not always the same. The reason is that the philosophers run concurrently as threads, and the scheduling of threads by the operating system is non-deterministic. The sleep times are random, so the order in which philosophers become hungry and try to eat varies between runs.
+
+2. In both Tasks, why are the semaphores used, either for the issue of mutex lock, synchronization like the parent waiting for the child, or for the producer and consumer sharing the buffer?
+
+Semaphores are used for mutual exclusion to prevent race conditions when accessing shared resources (the forks). They also provide synchronization to ensure that a philosopher can only eat when both forks are available, similar to the producer-consumer problem where semaphores control access to a shared buffer.
+
+3. If the number of philosophers is changed by 1 (to 4), What are the outputs for both tasks?
+
+For Task 1: With 4 philosophers, the deadlock-free solution should still work, but the output sequences will vary due to concurrency.
+
+For Task 2: With 4 philosophers, since we alternate the fork picking order, it should also avoid deadlock, but again, outputs vary.
+
+4. What is the maximum number of philosophers, which means the output is blocked if it is over?
+
+The maximum number of philosophers that can avoid deadlock in a circular arrangement is generally odd numbers or even with the alternating strategy. For the standard problem with 5 forks and 5 philosophers, deadlock can occur if all pick left fork simultaneously. With the alternating pick order, it can handle even numbers. Theoretically, as long as the number is not causing a cycle where all wait for each other, but in practice, for circular dining, odd numbers are safer without special handling.
