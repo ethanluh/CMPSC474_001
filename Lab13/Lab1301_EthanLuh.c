@@ -39,9 +39,10 @@ int main() {
 void *philosopher(void *num) {
     int p = *(int *)num;
     
-    sem_wait(&atomic_execution);  // Acquire atomic execution lock
     
     think();
+    
+    sem_wait(&atomic_execution);  // Acquire atomic execution lock
     get_forks(p);
     printf("Philosopher %d start eating.\n", p);
     eat();
